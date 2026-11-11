@@ -23,7 +23,15 @@ jobs:
           mkdir -p assets
           cp icon.png assets/icon-only.png
           cp icon.png assets/icon-foreground.png
-          npx @capacitor/assets generate --android --iconBackgroundColor '#0b3a6e' --iconBackgroundColorDark '#0b3a6e'
+          cp icon.png assets/icon-background.png
+          npx @capacitor/assets generate --android
+      - name: Safety check for icon
+        run: |
+          R=android/app/src/main/res
+          if ! ls $R/mipmap-*/ic_launcher_background.* >/dev/null 2>&1; then
+            echo "background icon missing, removing adaptive icon files"
+            rm -rf $R/mipmap-anydpi-v26
+          fi
       - run: npx cap sync android
       - run: cd android && chmod +x gradlew && ./gradlew assembleDebug
       - run: cp android/app/build/outputs/apk/debug/app-debug.apk physify.apk
